@@ -24,7 +24,7 @@ These steps contain the installation process, software dependencies and building
 
    ```bash
    cd ~/catkin_ws/src
-   git clone https://github.com/Auterion/VIO.git
+   git clone https://github.com/Ben0126/VIO.git
    ```
 
 1. Install MAVROS (version 0.29.0 or above).

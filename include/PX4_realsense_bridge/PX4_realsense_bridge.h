@@ -48,7 +48,7 @@ class PX4_Realsense_Bridge {
   // Subscribers
   ros::Subscriber odom_sub_;
 	ros::Subscriber tfmini_sub;
-    ros::Subscriber att_sub;
+  ros::Subscriber att_sub;
 
   // Publishers
   ros::Publisher mavros_odom_pub_;

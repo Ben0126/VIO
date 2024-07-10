@@ -14,10 +14,6 @@ namespace bridge {
 PX4_Realsense_Bridge::PX4_Realsense_Bridge(const ros::NodeHandle& nh)
     : nh_(nh) {
 
-  nh.param<int>("uav_id", uav_id, 1);
-  uav_name = "/uav" + std::to_string(uav_id);
-  nh.param<std::string>("uav_name_mavros", uav_name_mavros, uav_name);
-
   // initialize subscribers
   odom_sub_ = nh_.subscribe<const nav_msgs::Odometry&>("/camera/odom/sample_throttled", 10, &PX4_Realsense_Bridge::odomCallback, this);
 

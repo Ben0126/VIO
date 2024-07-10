@@ -14,17 +14,22 @@ namespace bridge {
 PX4_Realsense_Bridge::PX4_Realsense_Bridge(const ros::NodeHandle& nh)
     : nh_(nh) {
 
+  nh.param<int>("uav_id", uav_id, 1);
+  uav_name = "/uav" + std::to_string(uav_id);
+  nh.param<std::string>("uav_name_mavros", uav_name_mavros, uav_name);
+
   // initialize subscribers
   odom_sub_ = nh_.subscribe<const nav_msgs::Odometry&>("/camera/odom/sample_throttled", 10, &PX4_Realsense_Bridge::odomCallback, this);
 
   tfmini_sub = nh_.subscribe<const sensor_msgs::Range&>("/mavros/distance_sensor/hrlv_ez4_pub", 10, &PX4_Realsense_Bridge::tfmini_cb, this);
-
   att_sub = nh_.subscribe<const sensor_msgs::Imu&>("/mavros/imu/data", 10, &PX4_Realsense_Bridge::att_cb, this);
 
   // publishers
-  mavros_odom_pub_ = nh_.advertise<nav_msgs::Odometry>("/mavros/odometry/out", 10);
+  mavros_odom_pub_ =
+      nh_.advertise<nav_msgs::Odometry>("/mavros/odometry/out", 10);
 
-  mavros_system_status_pub_ =  nh_.advertise<mavros_msgs::CompanionProcessStatus>("/mavros/companion_process/status", 1);
+  mavros_system_status_pub_ =
+      nh_.advertise<mavros_msgs::CompanionProcessStatus>("/mavros/companion_process/status", 1);
 
   last_callback_time = ros::Time::now();
 
@@ -59,7 +64,7 @@ Eigen::Vector3d PX4_Realsense_Bridge::quaternion_to_euler(const Eigen::Quaternio
 
 void PX4_Realsense_Bridge::att_cb(const sensor_msgs::Imu& msg)
 {
-	 q_fcu= Eigen::Quaterniond(msg.orientation.w, msg.orientation.x, msg.orientation.y, msg.orientation.z);
+     q_fcu= Eigen::Quaterniond(msg.orientation.w, msg.orientation.x, msg.orientation.y, msg.orientation.z);
      euler_fcu = PX4_Realsense_Bridge::quaternion_to_euler(q_fcu);
      attitude[0] = euler_fcu[0];
      attitude[1] = euler_fcu[1];
@@ -69,13 +74,10 @@ void PX4_Realsense_Bridge::att_cb(const sensor_msgs::Imu& msg)
 
 void PX4_Realsense_Bridge::odomCallback(const nav_msgs::Odometry& msg) {
 
-  vrt_h = tfmini_z*cos(atan(sqrt( tan(attitude[0])*tan(attitude[0]) + tan(attitude[1])*tan(attitude[1]) )));
-  vrt_h = double(int(vrt_h*100)/100.0);
   // publish odometry msg
   nav_msgs::Odometry output = msg;
   output.header.frame_id = msg.header.frame_id;
   output.child_frame_id = msg.child_frame_id;
-  output.pose.pose.position.z = vrt_h;
   mavros_odom_pub_.publish(output);
 
   flag_first_pose_received = true;
